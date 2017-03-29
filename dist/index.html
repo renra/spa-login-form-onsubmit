@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="promise.js"></script>
+    <script src="fetch.js"></script>
+  </head>
+
+  <body>
+    <h1>Experimental SPA login</h1>
+
+    <div>
+      The goal here is to make all browsers prompt to save the credentials. Or at least as many as possible.
+    </div>
+
+    <div style="margin-top: 8px;">
+      This is done using the form onsubmit event, which triggers an AJAX auth request and is stopped. If the request succeeds, the form is submitted again by javascript.
+    </div>
+
+    <div style="margin-top: 8px;">
+      It redirects away after a successful auth. There was not other way I could make chrome prompt to save the password
+    </div>
+
+    <div style="margin-top: 8px; margin-bottom: 8px;">
+      Valid emails are <strong>a@b.com</strong> and <strong>c@d.com</strong>, valid passwords are <strong>1234</strong> and <strong>12345</strong> (you can mix them however you like)
+    </div>
+
+    <div id="placeholder">
+    </div>
+
+    <script type="text/javascript">
+      document.addEventListener('DOMContentLoaded', function(){
+        var placeholder = document.getElementById('placeholder');
+        var template = '<form id="fake-form" action="javascript:void(0)" method="POST"><div><input type="email" name="email" id="email"></div><div><input type="password" id="password"></div><div><input id="form-submit" type="submit" values="Submit"></div></form>';
+
+        placeholder.innerHTML = template;
+
+        var form = document.getElementById('fake-form');
+        var submit = document.getElementById('form-submit');
+
+        var emailInput = document.getElementById('email');
+        var passwordInput = document.getElementById('password');
+
+        var handler = function(e) {
+          console.log('Handler triggered');
+
+          var email = emailInput.value;
+          var password = passwordInput.value;
+
+          fetch(
+            '/auth',
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({email: email, password: password})
+            }
+          ).then(
+            function(response){
+              if(response.status == 200){
+                console.log('Success');
+                form.submit();
+                window.location.assign('http://www.elm-tutorial.org/');
+              }
+            }
+          )
+
+          e.stopPropagation();
+          e.preventDefault();
+          return false;
+        };
+
+        form.addEventListener('submit', handler);
+      });
+
+    </script>
+  </body>
+</html>
